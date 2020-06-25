@@ -181,18 +181,22 @@ export default {
       this.isPlaying = !this.isPlaying;
     },
     next() {
-      this.currentIndex += 1;
-      if (this.currentIndex === this.list.length) {
-        this.currentIndex = 0;
+      if (this.list.length > 0) {
+        this.currentIndex += 1;
+        if (this.currentIndex === this.list.length) {
+          this.currentIndex = 0;
+        }
+        this.id = this.list[this.currentIndex].id;
       }
-      this.id = this.list[this.currentIndex].id;
     },
     prev() {
-      this.currentIndex -= 1;
-      if (this.currentIndex === -1) {
-        this.currentIndex = this.list.length - 1;
+      if (this.list.length > 0) {
+        this.currentIndex -= 1;
+        if (this.currentIndex === -1) {
+          this.currentIndex = this.list.length - 1;
+        }
+        this.id = this.list[this.currentIndex].id;
       }
-      this.id = this.list[this.currentIndex].id;
     },
     playInList(index) {
       this.currentIndex = index
@@ -280,7 +284,7 @@ export default {
   height: calc(100% - 60px - 66px);
   position: fixed;
   top: 60px;
-  right: 0;
+  right: 17px;
   z-index: 100;
 }
 .list .top {

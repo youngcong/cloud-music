@@ -2,7 +2,7 @@
   <div class="discovery-container">
     <!-- 轮播图 -->
     <el-carousel class="" :interval="4000" type="card">
-      <el-carousel-item v-for="(item, index) in banners" :key="index">
+      <el-carousel-item v-for="(item, index) in banners" :key="index" @click.native="playMusic(item.encodeId)">
         <img :src="item.imageUrl" alt="" />
       </el-carousel-item>
     </el-carousel>
@@ -74,11 +74,8 @@ export default {
   name: 'discovery',
   data() {
     return {
-      // 轮播图
       banners: [],
-      // 推荐歌单
       playList: [],
-      // 最新歌曲
       newSongs: {},
       mvs: []
     }
@@ -103,7 +100,9 @@ export default {
 
   methods: {
     async playMusic(id) {
-      this.$parent.id = id
+      if (id) {
+        this.$parent.id = id
+      }
     },
     toPlaylist(id) {
       this.$router.push(`/playlist?id=${id}`)

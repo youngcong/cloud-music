@@ -126,7 +126,7 @@
 </template>
 
 <script>
-import { getMusicUrl, getPlaylistDetail, getPlaylistComments } from 'network/request'
+import { getMusicUrl, getPlaylistDetail, getPlaylistComments, getSongDetail } from 'network/request'
 
 export default {
   name: 'playlist',
@@ -142,7 +142,8 @@ export default {
 
       playlist: {},
       hotComments: [],
-      comments: []
+      comments: [],
+      // songs: []
     }
   },
   created() {
@@ -166,6 +167,11 @@ export default {
       this.avatarUrl = resp.playlist.creator.avatarUrl
       this.nickname = resp.playlist.creator.nickname
       this.playlist = resp.playlist
+      
+      // for (let i = 0; i < resp.playlist.trackIds.length; i++) {
+      //   const { data: songResp } = await getSongDetail(resp.playlist.trackIds[i].id)
+      //   this.songs.push(songResp.songs[0])
+      // }
     },
 
     // 获取热评
