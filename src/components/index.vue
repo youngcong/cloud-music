@@ -49,7 +49,7 @@
           <div class="left">
             <img
               class="album-pic"
-              :src="item.al.picUrl+'?param=40y40'"
+              :src="item.al.picUrl + '?param=40y40'"
               alt=""
             />
           </div>
@@ -68,13 +68,33 @@
         </div>
         <div v-else class="space"></div>
         <div class="controller">
-          <i class="iconfont icon-step-backward"></i>
-          <i class="iconfont icon-pause" v-if="isPlaying" @click="playOrPause()"></i>
+          <i class="iconfont icon-step-backward" @click="prev"></i>
+          <i
+            class="iconfont icon-pause"
+            v-if="isPlaying"
+            @click="playOrPause()"
+          ></i>
           <i class="iconfont icon-play" v-else @click="playOrPause()"></i>
-          <i class="iconfont icon-stepforward"></i>
+          <i class="iconfont icon-stepforward" @click="next"></i>
         </div>
-        <div class="menu">
+        <div class="menu" @click="showList = !showList">
           <i class="iconfont icon-bars"></i>
+        </div>
+      </div>
+    </div>
+    <div class="list" v-show="showList">
+      <div class="top">总 {{ list.length }} 首</div>
+      <div class="list-items">
+        <div
+          class="item-wrapper"
+          :class="{ activePlaying: currentIndex === index }"
+          v-for="(item, index) in list"
+          :key="index"
+          @dblclick="playInList(index)"
+        >
+          <span class="name">{{ item.name }}</span>
+          <span class="artist">{{ item.ar[0].name }}</span>
+          <span class="duration">{{ item.dt | playTimeFormat }}</span>
         </div>
       </div>
     </div>
@@ -82,8 +102,10 @@
 </template>
 
 <script>
-import { getMusicUrl, getMusicInfo } from 'network/request'
-import throttle from 'lodash/throttle'
+import { getMusicUrl, getMusicInfo } from "network/request";
+import throttle from "lodash/throttle";
+
+const ListWidth = 364;
 
 export default {
   name: "index",
@@ -93,7 +115,10 @@ export default {
       musicUrl: "",
       isPlaying: false,
       percent: 0,
-      currentTime: 0
+      currentTime: 0,
+      list: [],
+      showList: false,
+      currentIndex: 0
     };
   },
   mounted() {
@@ -104,37 +129,64 @@ export default {
     });
 
     this._timeUpdate = throttle(() => {
-      console.log(this.$refs.music.currentTime)
-      this.currentTime = this.$refs.music.currentTime * 1000
-      this.percent = this.currentTime / this.item.dt * 100
-    }, 250)
+      // console.log(this.$refs.music.currentTime)
+      this.currentTime = this.$refs.music.currentTime * 1000;
+      this.percent = (this.currentTime / this.item.dt) * 100;
+    }, 250);
+
+    window.addEventListener("click", e => {
+      if (e.pageX < window.innerWidth - ListWidth) {
+        this.showList = false;
+      }
+    });
   },
   watch: {
     async item() {
-      const { data: urlResp } = await getMusicUrl(this.item.id)
+      const { data: urlResp } = await getMusicUrl(this.item.id);
       if (!urlResp.data[0].url) {
-        return this.$message.error('该资源为VIP专享，暂不支持播放 ！')
+        return this.$message.error("该资源为VIP专享，暂不支持播放 ！");
       }
       // 设置给父组件的播放地址
-      this.musicUrl = urlResp.data[0].url
-      this.isPlaying = true
+      this.musicUrl = urlResp.data[0].url;
+      this.isPlaying = true;
 
-      this.$refs.music.addEventListener('timeupdate', this._timeUpdate)
+      this.$refs.music.addEventListener("timeupdate", this._timeUpdate);
+    },
+    async list() {
+      this.currentIndex = 0;
+      this.item = this.list[0];
     }
   },
   methods: {
     playOrPause() {
       if (!this.musicUrl) {
-        return
+        return;
       }
       if (this.isPlaying) {
-        this.$refs.music.pause()
-
+        this.$refs.music.pause();
       } else {
-        this.$refs.music.play()
+        this.$refs.music.play();
       }
-      this.isPlaying = !this.isPlaying
+      this.isPlaying = !this.isPlaying;
     },
+    next() {
+      this.currentIndex += 1;
+      if (this.currentIndex === this.list.length) {
+        this.currentIndex = 0;
+      }
+      this.item = this.list[this.currentIndex];
+    },
+    prev() {
+      this.currentIndex -= 1;
+      if (this.currentIndex === -1) {
+        this.currentIndex = this.list.length - 1;
+      }
+      this.item = this.list[this.currentIndex];
+    },
+    playInList(index) {
+      this.currentIndex = index
+      this.item = this.list[this.currentIndex]
+    }
   }
 };
 </script>
@@ -169,6 +221,14 @@ export default {
   border-radius: 5px;
   margin: 0 8px;
 }
+.bottom-wrapper .bottom-info .music-info .basic-info {
+  color: #606266;
+  font-size: 0.95em;
+}
+.bottom-wrapper .bottom-info .music-info .timer {
+  font-size: 0.8em;
+  color: #666;
+}
 .bottom-wrapper .bottom-info .controller {
   display: flex;
   width: 100px;
@@ -200,5 +260,44 @@ export default {
   line-height: 60px;
   margin-right: 10px;
   text-align: right;
+}
+
+.list {
+  background-color: #fff;
+  width: 364px;
+  border-left: 1px solid #eee;
+  height: calc(100% - 60px - 66px);
+  position: fixed;
+  top: 60px;
+  right: 0;
+  z-index: 100;
+}
+.list .top {
+  color: rgb(202, 202, 202);
+  padding: 20px;
+}
+.list .list-items .item-wrapper {
+  display: flex;
+  flex: 1;
+  font-size: 0.9em;
+  padding: 10px 20px;
+}
+.list .list-items .item-wrapper:nth-child(2n),
+.list .list-items .item-wrapper:hover {
+  background-color: #fafafa;
+}
+.list .list-items .item-wrapper .name {
+  flex-basis: 50%;
+}
+.list .list-items .item-wrapper .artist {
+  flex-basis: 40%;
+  padding-left: 6px;
+}
+.list .list-items .item-wrapper .duration {
+  flex-basis: 10%;
+  text-align: right;
+}
+.list .activePlaying {
+  color: rgb(199, 51, 47);
 }
 </style>

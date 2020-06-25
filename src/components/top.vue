@@ -1,15 +1,15 @@
 <template>
   <div class="top-container">
     <div class="left-box">
-      <div class="icon-wrapper">
-        <span class="iconfont icon-home" @click="toHomeClick()"></span>
+      <!-- <div class="icon-wrapper"> -->
+        <!-- <span class="iconfont icon-home" @click="toHomeClick()"></span> -->
         <!-- <span class="iconfont icon-sami-select"></span> -->
-        <span class="iconfont icon-full-screen" @click="getFullCreeen(btnStatus)"></span>
+        <!-- <span class="iconfont icon-full-screen" @click="getFullCreeen(btnStatus)"></span> -->
+      <!-- </div> -->
+      <div class="history-wrapper">
+        <span class="iconfont icon-arrow-lift" @click="historyPrev"></span>
+        <span class="iconfont icon-arrow-right" @click="historyNext"></span>
       </div>
-      <!-- <div class="history-wrapper">
-        <span class="iconfont icon-arrow-lift"></span>
-        <span class="iconfont icon-arrow-right"></span>
-      </div> -->
     </div>
     <div class="right-box">
       <div class="el-input el-input--small el-input--prefix">
@@ -83,6 +83,14 @@ export default {
           wscript.SendKeys('{F11}')
         }
       }
+    },
+
+    historyPrev() {
+      this.$router.go(-1)
+      // window.history.go(-1)
+    },
+    historyNext() {
+      window.history.go(1)
     }
   }
 }

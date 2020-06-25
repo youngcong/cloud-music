@@ -17,7 +17,7 @@
           <!-- 时间 -->
           <span class="time">{{ playlist.createTime | dateFormat }}</span>
         </div>
-        <div class="play-wrap">
+        <div class="play-wrap" @click="playAll(playlist.tracks)">
           <span class="iconfont icon-circle-play"></span>
           <span class="text">播放全部</span>
         </div>
@@ -215,6 +215,10 @@ export default {
 
       this.$parent.item = item
 
+    },
+
+    async playAll(tracks) {
+      this.$parent.list = tracks
     }
   }
 }
