@@ -99,7 +99,6 @@ export function getSimiMvUrl(param) {
   return axios.post('discovery/simiMV', param)
 }
 
-export function getMusicInfo(id, param) {
-  console.log('requesting for music info')
-  return axios.post(`song/detail?ids=${id}`, param)
+export function getSongDetail(id) {
+  return axios.post(`v3/song/detail?ids=[${id}]&c=[{id:${id}}]`)
 }

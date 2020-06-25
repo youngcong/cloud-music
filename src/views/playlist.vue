@@ -2,19 +2,13 @@
   <div class="playlist-container">
     <div class="top-wrap">
       <div class="img-wrap">
-        <!-- 封面 -->
         <img :src="playlist.coverImgUrl" alt="" />
       </div>
       <div class="info-wrap">
-        <!-- 名字 -->
         <p class="title">{{ playlist.name }}</p>
         <div class="author-wrap">
-          <!-- 头像 -->
-          <!-- 神经病VUE,不加v-if="playlist.creator !== undefined" 报错 -->
           <img class="avatar" :src="playlist.creator.avatarUrl" v-if="playlist.creator !== undefined" alt="" />
-          <!-- 名字 -->
           <span class="name" v-if="playlist.creator !== undefined">{{ playlist.creator.nickname }}</span>
-          <!-- 时间 -->
           <span class="time">{{ playlist.createTime | dateFormat }}</span>
         </div>
         <div class="play-wrap" @click="playAll(playlist.tracks)">
@@ -45,7 +39,7 @@
             <th>时长</th>
           </thead>
           <tbody>
-            <tr class="el-table__row" v-for="(item, index) in playlist.tracks" :key="index" @click="playMusic(item)">
+            <tr class="el-table__row" v-for="(item, index) in playlist.tracks" :key="index" @click="playMusic(item.id, index)">
               <td>{{ index + 1 }}</td>
               <td>
                 <div class="img-wrap">
@@ -56,9 +50,7 @@
               <td>
                 <div class="song-wrap">
                   <div class="name-wrap">
-                    <!-- 名称 -->
                     <span>{{ item.name }}</span>
-                    <!-- mv图标 -->
                     <span v-if="item.mvid !== 0" class="iconfont icon-mv"></span>
                   </div>
                 </div>
@@ -199,7 +191,7 @@ export default {
       this.total = resp.total
     },
 
-    async playMusic(item) {
+    async playMusic(id, index) {
       // 设置给父组件的播放地址
       // this.$parent.musicUrl = `http://music.163.com/song/media/outer/url?id=${id}.mp3`
 
@@ -213,8 +205,9 @@ export default {
       // this.$parent.musicUrl = resp.data[0].url
 
 
-      this.$parent.item = item
-
+      // this.$parent.item = item
+      this.$parent.id = id
+      this.$parent.currentIndex = index
     },
 
     async playAll(tracks) {

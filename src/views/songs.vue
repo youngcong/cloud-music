@@ -72,16 +72,7 @@ export default {
     },
 
     async playMusic(id) {
-      // 设置给父组件的播放地址
-      // this.$parent.musicUrl = `http://music.163.com/song/media/outer/url?id=${id}.mp3`
-
-      // 获取歌曲播放地址
-      const { data: resp } = await getMusicUrl(id)
-      if (!resp.data[0].url) {
-        return this.$message.error('该资源为VIP专享，暂不支持播放 ！')
-      }
-      // 设置给父组件的播放地址
-      this.$parent.musicUrl = resp.data[0].url
+      this.$parent.id = id
     }
   }
 }

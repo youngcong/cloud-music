@@ -102,7 +102,7 @@
 </template>
 
 <script>
-import { getMusicUrl, getMusicInfo } from "network/request";
+import { getMusicUrl, getSongDetail } from "network/request";
 import throttle from "lodash/throttle";
 
 const ListWidth = 364;
@@ -111,6 +111,7 @@ export default {
   name: "index",
   data() {
     return {
+      id: '',
       item: {},
       musicUrl: "",
       isPlaying: false,
@@ -118,7 +119,8 @@ export default {
       currentTime: 0,
       list: [],
       showList: false,
-      currentIndex: 0
+      currentIndex: 0,
+      song: {}
     };
   },
   mounted() {
@@ -131,7 +133,7 @@ export default {
     this._timeUpdate = throttle(() => {
       // console.log(this.$refs.music.currentTime)
       this.currentTime = this.$refs.music.currentTime * 1000;
-      this.percent = (this.currentTime / this.item.dt) * 100;
+      this.percent = (this.currentTime / (this.item.dt || this.item.duration)) * 100;
     }, 250);
 
     window.addEventListener("click", e => {
@@ -141,20 +143,29 @@ export default {
     });
   },
   watch: {
-    async item() {
-      const { data: urlResp } = await getMusicUrl(this.item.id);
+    async id() {
+      const { data: songResp } = await getSongDetail(this.id)
+      this.item = songResp.songs[0]
+
+      const { data: urlResp } = await getMusicUrl(this.id);
       if (!urlResp.data[0].url) {
+        this.musicUrl = ''
+        this.isPlaying = false
+        this.percent = 0
         return this.$message.error("该资源为VIP专享，暂不支持播放 ！");
       }
-      // 设置给父组件的播放地址
       this.musicUrl = urlResp.data[0].url;
       this.isPlaying = true;
 
       this.$refs.music.addEventListener("timeupdate", this._timeUpdate);
+
+      if (this.list.length !== 0 && this.id != this.list[this.currentIndex].id) {
+        this.currentIndex = -1
+      }
     },
     async list() {
       this.currentIndex = 0;
-      this.item = this.list[0];
+      this.id = this.list[0].id;
     }
   },
   methods: {
@@ -174,18 +185,18 @@ export default {
       if (this.currentIndex === this.list.length) {
         this.currentIndex = 0;
       }
-      this.item = this.list[this.currentIndex];
+      this.id = this.list[this.currentIndex].id;
     },
     prev() {
       this.currentIndex -= 1;
       if (this.currentIndex === -1) {
         this.currentIndex = this.list.length - 1;
       }
-      this.item = this.list[this.currentIndex];
+      this.id = this.list[this.currentIndex].id;
     },
     playInList(index) {
       this.currentIndex = index
-      this.item = this.list[this.currentIndex]
+      this.id = this.list[this.currentIndex].id
     }
   }
 };
