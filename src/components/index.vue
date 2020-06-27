@@ -43,6 +43,7 @@
         :percentage="percent"
         :show-text="false"
         color="rgb(199, 51, 47)"
+        @click.native="updateProgress"
       ></el-progress>
       <div class="bottom-info">
         <div class="music-info" v-if="Object.keys(item).length !== 0">
@@ -77,8 +78,8 @@
           <i class="iconfont icon-play" v-else @click="playOrPause()"></i>
           <i class="iconfont icon-stepforward" @click="next"></i>
         </div>
-        <div class="menu" @click="showList = !showList">
-          <i class="iconfont icon-bars"></i>
+        <div class="menu">
+          <i class="iconfont icon-bars" @click="showList = !showList"></i>
         </div>
       </div>
     </div>
@@ -124,17 +125,23 @@ export default {
     };
   },
   mounted() {
-    //订阅消息
     this.$pubSub.subscribe("pauseAudio", msg => {
       var audio = document.getElementById("music");
       audio.pause();
+      this.isPlaying = false;
     });
 
     this._timeUpdate = throttle(() => {
-      // console.log(this.$refs.music.currentTime)
       this.currentTime = this.$refs.music.currentTime * 1000;
-      this.percent = (this.currentTime / (this.item.dt || this.item.duration)) * 100;
+      this.percent = (this.currentTime / (this.item.dt || this.item.duration)).toFixed(3) * 100;
     }, 250);
+
+    this.$refs.music.addEventListener('ended', () => {
+      if (!this.list.length) {
+        this.isPlaying = false
+      }
+      this.next()
+    });
 
     window.addEventListener("click", e => {
       if (e.pageX < window.innerWidth - ListWidth) {
@@ -201,6 +208,17 @@ export default {
     playInList(index) {
       this.currentIndex = index
       this.id = this.list[this.currentIndex].id
+    },
+    updateProgress(e) {
+      const offsetX = e.offsetX
+      const windowX = window.innerWidth
+      this.percent = offsetX / windowX * 100
+      this.$refs.music.currentTime = this.$refs.music.duration * this.percent / 100
+    },
+    resetProgressBar() {
+      this.isPlaying = false
+      this.percent = 0
+      this.currentTime = 0
     }
   }
 };
